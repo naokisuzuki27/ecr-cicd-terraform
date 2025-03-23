@@ -1,3 +1,3 @@
 resource "aws_ecr_repository" "main" {
-  name = "example-repository"
+  name = "naoki-ecr-repository"
 }
