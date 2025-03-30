@@ -1,12 +1,12 @@
 {
     "family": "basis-app",
-    "executionRoleArn": "${EXECUTION_ROLE_ARN}",
-    "taskRoleArn": "${TASK_ROLE_ARN}",
+    "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}",
+    "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${TASK_ROLE_ARN}",
     "networkMode": "awsvpc",
     "containerDefinitions": [
       {
         "name": "basis-app",
-        "image": "${ecr_repository_url}:${image_tag}",
+        "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${IMAGE_TAG}",
         "essential": true,
         "portMappings": [
           {
@@ -18,8 +18,8 @@
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
-            "awslogs-group": "${log_group_name}",
-            "awslogs-region": "${region}",
+            "awslogs-group": "${LOG_GROUP_NAME}",
+            "awslogs-region": "${REGION}",
             "awslogs-stream-prefix": "ecs"
           }
         },
