@@ -6,7 +6,7 @@
     "containerDefinitions": [
       {
         "name": "basis-app",
-        "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${IMAGE_TAG}",
+        "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${IMAGE_TAG}",
         "essential": true,
         "portMappings": [
           {
@@ -19,7 +19,7 @@
           "logDriver": "awslogs",
           "options": {
             "awslogs-group": "${LOG_GROUP_NAME}",
-            "awslogs-region": "${REGION}",
+            "awslogs-region": "${AWS_REGION}",
             "awslogs-stream-prefix": "ecs"
           }
         },

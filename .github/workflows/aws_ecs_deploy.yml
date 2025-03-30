@@ -11,7 +11,7 @@ env:
   ECR_REPOSITORY_NAME: /basis/nextjs-app
   IMAGE_TAG: todo
   LOG_GROUP_NAME: ecs-test-dev--basis-cluster
-  REGION: ap-northeast-1
+  AWS_REGION: ap-northeast-1
   ECS_SERVICE: basis-app-service
   ECS_CLUSTER: ecs-test-dev-cluster
   ECS_TASK_DEFINITION: task-definition.json
