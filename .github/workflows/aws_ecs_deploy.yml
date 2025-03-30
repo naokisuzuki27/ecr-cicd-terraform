@@ -9,7 +9,7 @@ env:
   OIDC_ROLE_NAME: naoki-github-actions-ecr-push-role
   EXECUTION_ROLE_NAME: ecs-task-execution-role
   TASK_ROLE_ARN: ecs-task-role
-  ECR_REPOSITORY_NAME: /basis/nextjs-app
+  ECR_REPOSITORY_NAME: basis/nextjs-app
   IMAGE_TAG: todo
   LOG_GROUP_NAME: ecs-test-dev--basis-cluster
   AWS_REGION: ap-northeast-1
