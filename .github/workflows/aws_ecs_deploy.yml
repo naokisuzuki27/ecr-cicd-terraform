@@ -6,6 +6,7 @@ on:
 
 env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+  OIDC_ROLE_NAME: naoki-github-actions-ecr-push-role
   EXECUTION_ROLE_NAME: ecs-task-execution-role
   TASK_ROLE_ARN: ecs-task-role
   ECR_REPOSITORY_NAME: /basis/nextjs-app
@@ -33,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::<AWS_ACCOUNT_ID>:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.OIDC_ROLE_NAME }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
