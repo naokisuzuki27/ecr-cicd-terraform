@@ -1,33 +1,64 @@
-name: ecr push image
+name: Deploy to Amazon ECS
 
 on:
   push:
+    branches: [ "main" ]  # mainブランチにプッシュされた時に実行
+
+env:
+  AWS_REGION: ap-northeast-1                   # AWSリージョン（必要に応じて変更してください）
+  ECR_REPOSITORY: basis/nextjs-app                  # ECRリポジトリ名
+  ECS_SERVICE: basis-app-service                  # ECSサービス名
+  ECS_CLUSTER: ecs-test-dev-cluster                  # ECSクラスター名
+  ECS_TASK_DEFINITION: task-definition.json    # タスク定義ファイル
+  CONTAINER_NAME: my-container                 # コンテナ名（タスク定義内のコンテナ名と一致させる）
 
 jobs:
-  push:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
+      id-token: write   # GitHub OIDCプロバイダー認証に必要
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-east-1 # リージョン
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }} # GitHub Actions 用の IAM ロールの ARN
+          role-to-assume: arn:aws:iam::<AWS_ACCOUNT_ID>:role/GitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
 
-      # NOTE: ECR Public の場合は `with.registry-type: public` を指定する
-      - uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
         id: login-ecr
-        # with:
-        #   registry-type: public
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: build and push docker image to ecr
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: example-repository
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          # Dockerイメージをビルド
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # ECRにプッシュ
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          # 次のステップで使用するイメージURIを設定
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true

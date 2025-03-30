@@ -55,6 +55,6 @@ data "aws_iam_policy_document" "main_policy" {
       "ecr:BatchCheckLayerAvailability",
       "ecr:PutImage",
     ]
-    resources = [aws_ecr_repository.main.arn]
+    resources = [local.ecr_arn]
   }
 }
