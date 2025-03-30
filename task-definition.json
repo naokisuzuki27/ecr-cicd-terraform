@@ -1,0 +1,41 @@
+{
+    "family": "basis-app",
+    "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${EXECUTION_ROLE_NAME}",
+    "taskRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${TASK_ROLE_ARN}",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+      {
+        "name": "basis-app",
+        "image": "${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}:${IMAGE_TAG}",
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "hostPort": 3000,
+            "protocol": "tcp"
+          }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "${LOG_GROUP_NAME}",
+            "awslogs-region": "${REGION}",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        "environment": [
+          {
+            "name": "ENVIRONMENT",
+            "value": "production"
+          }
+        ],
+        "cpu": 256,
+        "memory": 512
+      }
+    ],
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
